@@ -1,0 +1,41 @@
+// Copyright 2026 The Chromium Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module ctap_enrollment.mojom;
+
+// Browser-to-renderer notifications for the enrollment flow.
+interface Page {
+  // Progress update (scanning, connecting, sending the key, etc.).
+  OnStatus(string message);
+
+  // The client's public identity key has been delivered to the authenticator
+  // over the direct BLE connection. The user must confirm on the authenticator
+  // that this verification code matches the one the authenticator displays
+  // (numeric comparison); it is derived from the public key both sides hold.
+  OnVerificationCode(string code);
+
+  // The user confirmed on the authenticator: enrollment is complete.
+  OnEnrolled();
+
+  // Enrollment could not proceed (no adapter, permission denied, connection or
+  // write failure, etc.).
+  OnScanError(string message);
+};
+
+// Renderer-to-browser interface driving the enrollment flow.
+interface PageHandler {
+  // Finds the authenticator (which advertises the enrollment service UUID),
+  // opens a direct BLE (GATT) connection to it, and writes the client's public
+  // identity key. A web page cannot open such a connection, and a remote
+  // authenticator is out of range, so only a physically present authenticator
+  // can be reached.
+  StartEnrollment();
+};
+
+// Factory that binds a PageHandler and the Page remote for the
+// chrome://ctap-enrollment page.
+interface PageHandlerFactory {
+  CreatePageHandler(pending_remote<Page> page,
+                    pending_receiver<PageHandler> receiver);
+};

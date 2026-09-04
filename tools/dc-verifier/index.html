@@ -1,0 +1,35 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>DC API verifier (test)</title>
+<style>body{font:16px system-ui;margin:2rem;max-width:40rem}pre{background:#f4f4f4;padding:1rem;white-space:pre-wrap}</style>
+<h1>Digital Credentials API — cross-device test verifier</h1>
+<p>Requests an OpenID4VP presentation through <code>navigator.credentials.get({digital})</code>. On desktop Chromium this shows a QR code; scan it with the wallet.</p>
+<button id="go">Request credential</button>
+<pre id="out">idle</pre>
+<script>
+const out = document.getElementById('out');
+document.getElementById('go').onclick = async () => {
+  out.textContent = 'requesting…';
+  try {
+    const cred = await navigator.credentials.get({
+      digital: {
+        requests: [{
+          protocol: 'openid4vp',
+          data: {
+            response_type: 'vp_token',
+            response_mode: 'dc_api',
+            nonce: crypto.randomUUID(),
+            dcql_query: { credentials: [{ id: 'pid', format: 'dc+sd-jwt',
+              meta: { vct_values: ['urn:eudi:pid:1'] },
+              claims: [{ path: ['given_name'] }, { path: ['family_name'] }] }] }
+          }
+        }]
+      }
+    });
+    out.textContent = 'protocol: ' + cred.protocol + '\n' +
+      'data: ' + JSON.stringify(cred.data, null, 2);
+  } catch (e) {
+    out.textContent = 'error: ' + e.name + ': ' + e.message;
+  }
+};
+</script>

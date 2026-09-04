@@ -1,0 +1,29 @@
+@startuml
+actor user
+participant authenticator
+participant client
+
+user -> authenticator : start enrolling a new client
+authenticator -> authenticator : enter enrollment mode,\nadvertise presence (GATT enrollment service)
+authenticator --> user : "open chrome://ctap-enrollment\nin your browser's address bar"
+user -> client : open chrome://ctap-enrollment (address bar)
+note over client : privileged page; its origin is shown in the address bar\nand cannot be forged by web content
+client -> authenticator : discover + open a direct BLE connection (central role)
+note over client, authenticator : only the privileged browser page opens this connection\n(the service is on the Web Bluetooth blocklist);\na remote party is out of Bluetooth range
+authenticator -> client : authenticator identifier AID
+client -> client : generate a NEW identity key pair for AID\n(e.g. Ed25519 / P-256); never reuse another one
+client -> authenticator : public identity key PKc (over the BLE connection)
+authenticator -> authenticator : pick nonce Na
+authenticator -> client : commitment C = h(AID, PKc, Na)
+client -> client : pick nonce Nc
+client -> authenticator : Nc
+authenticator -> client : Na (opened)
+client -> client : check C, then code = g(AID, PKc, Na, Nc)
+authenticator -> authenticator : code = g(AID, PKc, Na, Nc)
+note over client, authenticator : each nonce is committed before the peer's is revealed,\nso no participant can bias the code: two distinct pairings\nyield unrelated codes (as in Bluetooth Secure Simple Pairing)
+client --> user : display verification code
+user -> authenticator : type the code
+authenticator -> authenticator : compare typed code with its own;\nabort enrollment on mismatch
+authenticator -> authenticator : on match: store PKc in trust list
+client -> client : store private key under AID\nin the platform's protected key store
+@enduml

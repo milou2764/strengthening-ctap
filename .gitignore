@@ -1,0 +1,32 @@
+# --- LaTeX build artifacts ---
+*.aux
+*.log
+*.out
+*.toc
+*.bbl
+*.blg
+*.synctex.gz
+missfont.log
+
+# --- Android / Gradle ---
+android-wallet/.gradle/
+android-wallet/build/
+android-wallet/app/build/
+android-wallet/**/build/
+android-wallet/local.properties
+android-wallet/.idea/
+android-wallet/*.iml
+*.apk
+
+# --- Python ---
+__pycache__/
+*.pyc
+.venv/
+
+# --- OS ---
+.DS_Store
+
+# --- PlantUML rendered output at models/ root (rendered PNGs live in paper/) ---
+models/**/*.png
+android-wallet/.kotlin/
+paper

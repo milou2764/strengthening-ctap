@@ -1,0 +1,37 @@
+# Copyright 2026 The Chromium Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//mojo/public/tools/bindings/mojom.gni")
+
+assert(!is_android)
+
+source_set("ctap_enrollment") {
+  sources = [
+    "ctap_enrollment_page_handler.cc",
+    "ctap_enrollment_page_handler.h",
+    "ctap_enrollment_ui.cc",
+    "ctap_enrollment_ui.h",
+  ]
+
+  public_deps = [ ":mojo_bindings" ]
+
+  deps = [
+    "//base",
+    "//chrome/browser/profiles:profile",
+    "//chrome/browser/resources/ctap_enrollment:resources_grit",
+    "//chrome/browser/webauthn",
+    "//chrome/common",
+    "//content/public/browser",
+    "//content/public/common",
+    "//crypto",
+    "//device/bluetooth",
+    "//mojo/public/cpp/bindings",
+    "//ui/webui",
+  ]
+}
+
+mojom("mojo_bindings") {
+  sources = [ "ctap_enrollment.mojom" ]
+  webui_module_path = "/"
+}

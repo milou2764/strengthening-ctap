@@ -1,0 +1,12 @@
+@startuml
+participant client
+participant idp
+participant verifier
+client -> verifier: ask service
+verifier -> client: redirect to idp
+client -> idp: redirected
+client -> idp: credential
+idp -> client: token
+client -> verifier: token
+verifier --> client: access
+@enduml

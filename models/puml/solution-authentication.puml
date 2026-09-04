@@ -1,0 +1,23 @@
+@startuml
+actor user
+participant authenticator
+participant client
+participant verifier
+
+user -> client : visit website
+client -> verifier : visit website
+verifier --> client : credential request
+client -> authenticator : QR code
+authenticator --> client : fresh per-session BLE advert (nonce)
+client <-> authenticator : mount CTAP data transfer channel
+authenticator -> client : authenticator identifier AID\n(inside the encrypted channel only)
+client -> client : select the private key enrolled under AID\nfrom the protected key store
+client -> client : generate COSE_Sign1 assertion\n(handshake transcript hash + timestamp)
+client -> authenticator : COSE_Sign1 assertion
+authenticator -> authenticator : verify COSE_Sign1 against the key enrolled\nfor this client (client authentication)
+authenticator -> authenticator : check timestamp not expired (replay window)
+authenticator -> authenticator : check hash in COSE = this session's\nNoise handshake-transcript hash (not replayable)
+authenticator -> user : ask for consent
+user --> authenticator : consent
+authenticator --> client : credential
+@enduml

@@ -1,0 +1,44 @@
+@startuml
+!pragma teoz true
+box Victim #00379120
+participant "Smartphone" as victphone
+box "PC"
+participant "Web Browser" as victpc
+end box
+end box
+participant "Relay server" as relayserv
+box Attacker #AE161220
+participant "Smartphone" as malphone
+box "PC"
+participant "Server" as malserv
+participant "Web Browser" as malclient
+end box
+end box
+participant "Legitimate server" as realserv
+
+malclient -> realserv: Visit legitimate website
+realserv --> malclient: credential request
+malclient -> malclient: Generates QR code
+malserv -> malserv: Retrieves QR code
+victpc -> malserv: Visit phishing website
+malserv --> victpc: QR code
+victphone -> victpc: Scan screen
+victpc --> victphone: QR code
+victphone -> victpc: Send BLE secret over bluetooth
+victpc -> malserv: Send BLE secret over internet
+loop until BLE secret is available
+malphone -> malserv: Ask for BLE secret
+end
+malserv --> malphone: BLE secret
+malphone -> malclient: Send BLE secret over bluetooth
+victphone <-> malclient: websocket data transfer channel establishment
+malclient -> relayserv: credential request
+relayserv -> victphone: credential request
+victphone -> relayserv: credential
+relayserv -> malclient: credential
+malclient -> realserv: credential
+realserv --> malclient: resource access
+
+
+@enduml
+

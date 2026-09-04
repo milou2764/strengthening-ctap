@@ -1,0 +1,19 @@
+@startuml
+participant "Smartphone" as phone
+participant "PC" as pc
+participant "Server" as serv
+
+pc -> serv: Visit website
+serv --> pc: credential request
+pc->pc:Generate QR code and listen for BLE adverts
+phone -> phone: Scan QR code
+phone -> pc: Send BLE advertisement
+phone<->pc: data transfer channel establishment (not detailed)
+pc -> phone: credential request
+phone -> pc: credential
+pc -> serv: credential
+serv --> pc: resource access
+
+
+@enduml
+

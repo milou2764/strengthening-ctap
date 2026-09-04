@@ -1,0 +1,34 @@
+@startuml
+!pragma teoz true
+box "Victim" #00379120
+participant "Smartphone\n(authenticator)" as victphone
+participant "Web Browser\n(phishing client)" as victpc
+end box
+participant "CTAP WebSocket proxy" as relayserv
+box "Attacker" #AE161220
+participant "Malicious Server\n(custom CTAP client)" as malserv
+end box
+participant "Legitimate verifier" as realserv
+
+victpc -> malserv : visit phishing website
+malserv -> realserv : visit legitimate website
+realserv --> malserv : credential request
+malserv -> malserv : custom CTAP client:\ngenerate QR code
+malserv --> victpc : relay QR code
+victpc -> victpc : display QR, start BLE scan\n(Web Bluetooth Scanning API)
+victphone -> victpc : scan QR from screen
+victphone --> victpc : BLE advertisement (session nonce)
+note over victpc : capture BLE advert via\nWeb Bluetooth Scanning API
+victpc -> malserv : relay BLE advert over the internet
+note over malserv : the custom CTAP client accepts the BLE\nadvert over the internet, not over Bluetooth
+victphone <-> relayserv : connect to proxy
+malserv <-> relayserv : connect to proxy\n(keys from QR secret + BLE)
+== encrypted CTAP channel established ==
+malserv -> relayserv : credential request
+relayserv -> victphone : credential request
+victphone -> victphone : user approves\n(believes it is legitimate)
+victphone -> relayserv : credential
+relayserv -> malserv : credential
+malserv -> realserv : credential
+realserv --> malserv : resource access (+ personal data)
+@enduml
